@@ -1,5 +1,6 @@
 from agent import Roomba, ObstacleAgent, DirtAgent, ChargingStation
 
+# Dictionary that maps types to portrayals (which are dictionaries themselves)
 portrayals = {
     ObstacleAgent: {
         "Shape": "rect",
@@ -19,18 +20,17 @@ portrayals = {
     Roomba: {
         "Shape": "circle",
         "Filled": "true",
-        "Color": "red",
+        "Color": "black",
         "Layer": 1,
-        "r": 0.4
+        "r": 0.3
     
     },
     ChargingStation: {
-        "Shape": "rect",
+        "Shape": "circle",
         "Filled": "true",
         "Color": "green",
         "Layer": 0,
-        "w": 1,
-        "h": 1
+        "r": 0.75
     },
 }
 

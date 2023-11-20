@@ -13,6 +13,9 @@ class Roomba(Agent):
         self.battery = 100
         self.low_battery = False
 
+    # Decide returns the decision taken as a function
+    # The functions return a boolean that represents if that action should 
+    # subtract battery or not
     def decide(self) -> Callable[[], bool]:
         has_obstacle = lambda cell: any(
             isinstance(agent, ObstacleAgent) for agent in 
@@ -37,9 +40,13 @@ class Roomba(Agent):
             cells
         ))
 
+        # 20% is pretty much a magic number to consider possible obstacles when
+        # trying to reach the charging station (it would be interesting to use 
+        # simple "learning" algorithms for the roombas to decide when to return.
         if self.battery <= len(self.station_path) * 1.2:
             self.low_battery = True
 
+        # Ambulance principle, if a roomba asked me to move, it has priority
         if self.free_path:
             self.free_path = False
             if not available_cells:
@@ -55,6 +62,7 @@ class Roomba(Agent):
                 
             return lambda: self.go_charge()
         
+        # Check if there is dirt in the current cell
         dirt = next(
             filter(
                 lambda agent: isinstance(agent, DirtAgent),
@@ -66,9 +74,12 @@ class Roomba(Agent):
         if dirt is not None:
             return lambda: self.clean(dirt)
         
+        # Fallback to explore (this method allows the agent to wait under 
+        # certain circumstances)
         return lambda: self.explore(available_cells)
 
     def explore(self, free_cells) -> bool:
+        # This is equivalent to waiting
         if not free_cells:
             return False
         
@@ -100,21 +111,20 @@ class Roomba(Agent):
 
         return True
 
+    # Ask a roomba that is in my path to the charging station to move
     def ask_to_move(self, agent: "Agent") -> bool:
-        print(f"{self.unique_id}: Beep Beep {agent.unique_id}")
         agent.free_path = [True, self]
         return True
 
     def recharge(self) -> bool:
-        print(f"{self.unique_id} @ {self.battery}% is charging")
         self.battery = self.battery + 5
-        print(f"{self.unique_id} @ {self.battery}% is charging")
         
         if self.battery >= 100:
             self.low_battery = False
 
         return False
     
+    # Invert path to return to my charging station
     def go_charge(self) -> bool:
         prev = self.station_path.pop()
         otherAgent = next(
@@ -130,6 +140,8 @@ class Roomba(Agent):
 
         return self.move(prev, track_path=False)
     
+    # track path is used to avoid roombas from looping when returning to the 
+    # charging station
     def move(self, pos: Tuple[int], track_path = True) -> bool:
         if track_path: self.station_path.append(self.pos)
         self.model.grid.move_agent(self, pos) 
@@ -140,14 +152,20 @@ class Roomba(Agent):
         if self.battery <= 0:
             return
         
+        # Watch out for second order functions in python \(◑﹏◐)/
         decision = self.decide()
-        self.battery -= (1 if decision() else 0)
 
-        
+        subtract_battery = decision()
+        self.battery -= (1 if subtract_battery else 0)
+        self.steps_taken += (1 if subtract_battery else 0)
+
+# The rest of the agents (boring stuff)      
 class ObstacleAgent(Agent):
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
 
+    # Hidden cat emoji 🐈!
+    # I can't believe you read this far
     def step(self):
         pass
 
@@ -162,5 +180,6 @@ class ChargingStation(Agent):
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
 
+    # 🦆 Rubber duck debugger (the duck shall guide you)
     def step(self):
         pass
