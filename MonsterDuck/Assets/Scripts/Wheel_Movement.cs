@@ -15,7 +15,7 @@ public class Wheel_Movement : MonoBehaviour {
     private Mesh mesh;
     private Vector3[] position;
     private Vector3[] basePosition;
-    [SerializeField] Vector3 initialTranslation;
+    public Vector3 initialTranslation;
 
     void Start() {
         mesh = GetComponentInChildren<MeshFilter>().mesh;
