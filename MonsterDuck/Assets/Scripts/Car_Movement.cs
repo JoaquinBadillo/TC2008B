@@ -13,7 +13,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Car_Movement : MonoBehaviour {
-    [SerializeField] GameObject[] wheels;
+    [SerializeField] Vector3[] wheelDisplacements;
+    [SerializeField] GameObject wheelPrefab;
     [SerializeField] Vector2 velocity;
     [SerializeField] float angularSpeed = 1.0f;
     private Mesh mesh;
@@ -28,10 +29,12 @@ public class Car_Movement : MonoBehaviour {
         for (int i = 0; i < position.Length; i++)
             basePosition[i] = position[i];
 
-        wheelMovements = new Wheel_Movement[wheels.Length];
+        wheelMovements = new Wheel_Movement[wheelDisplacements.Length];
 
-        for (int i = 0; i < wheels.Length; i++)
-            wheelMovements[i] = wheels[i].GetComponent<Wheel_Movement>();
+        for (int i = 0; i < wheelDisplacements.Length; i++) {
+            wheelMovements[i] = Instantiate(wheelPrefab, Vector3.zero, Quaternion.identity).GetComponent<Wheel_Movement>();
+            wheelMovements[i].initialTranslation = wheelDisplacements[i];
+        }
     }
 
     void Update() {
